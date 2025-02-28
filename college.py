@@ -34,7 +34,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Configure models
-genai.configure(api_key="AIzaSyAYfcTAFba5mn5LXw4UNNfnBvQEgmNbAos")
+genai.configure(api_key="AIzaSyBsq5Kd5nJgx2fejR77NT8v5Lk3PK4gbH8")
 gemini = genai.GenerativeModel('gemini-1.5-flash')
 embedder = SentenceTransformer('all-MiniLM-L6-v2')  # Embedding model
 
@@ -52,14 +52,14 @@ def load_data():
         index.add(np.array(embeddings).astype('float32'))
         return df, index
     except Exception as e:
-        st.error(f"❌ Failed to load data. Error: {e}")
+        st.error(f"Failed to load data. Error: {e}")
         st.stop()
 
 df, faiss_index = load_data()
 
 # App Header
-st.markdown('<h1 class="college-font">🏫📚 SVCEW College Chatbot 🤖💡</h1>', unsafe_allow_html=True)
-st.markdown('<h3 class="college-font">🎓 Your Guide to SVCEW College Information 📖✨</h3>', unsafe_allow_html=True)
+st.markdown('<h1 class="college-font">🏫 SVCEW College Chatbot</h1>', unsafe_allow_html=True)
+st.markdown('<h3 class="college-font">Your Guide to SVCEW College Information</h3>', unsafe_allow_html=True)
 st.markdown("---")
 
 # Function to find the closest matching question using FAISS
@@ -72,10 +72,10 @@ def find_closest_question(query, faiss_index, df):
 # Function to generate a response using Gemini
 def generate_response(query, contexts):
     prompt = f"""You are a helpful and knowledgeable chatbot for SVCEW College. Answer the following question using the provided context:
-    🎤 Question: {query}
-    📜 Contexts: {contexts}
-    - ✅ Provide a detailed and accurate answer.
-    - ❓ If the question is unclear, ask for clarification.
+    Question: {query}
+    Contexts: {contexts}
+    - Provide a detailed and accurate answer.
+    - If the question is unclear, ask for clarification.
     """
     response = gemini.generate_content(prompt)
     return response.text
@@ -86,23 +86,22 @@ if "messages" not in st.session_state:
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"], 
-                        avatar="🙋" if message["role"] == "user" else "🏫📖"):
+                        avatar="🙋" if message["role"] == "user" else "🏫"):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("💬 Ask anything about SVCEW College..."):
+if prompt := st.chat_input("Ask anything about SVCEW College..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    with st.spinner("🔍 Finding the best answer..."):
+    with st.spinner("Finding the best answer..."):
         try:
             # Find closest matching questions using FAISS
             contexts = find_closest_question(prompt, faiss_index, df)
             
             # Generate a response using Gemini
             response = generate_response(prompt, contexts)
-            response = f"🎓 **College Information**:
-{response}"
+            response = f"**College Information**:\n{response}"
         except Exception as e:
-            response = f"❌ Sorry, I couldn't generate a response. Error: {e}"
+            response = f"Sorry, I couldn't generate a response. Error: {e}"
     
     st.session_state.messages.append({"role": "assistant", "content": response})
     st.rerun()
